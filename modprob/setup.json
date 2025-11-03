@@ -18,7 +18,7 @@
   },
   "window.titleBarStyle": "native",
   "window.zoomLevel": 0.3,
-  "workbench.colorTheme": "Xcode Default (Dark Customized Version)",
+  "workbench.colorTheme": "Slate Contrast (rainglow)",
   "workbench.iconTheme": "vscode-jetbrains-icon-theme",
   "workbench.productIconTheme": "fluent-icons",
   "workbench.secondarySideBar.defaultVisibility": "hidden",

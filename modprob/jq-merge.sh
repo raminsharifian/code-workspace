@@ -1,5 +1,5 @@
-#!/bin/bash
-# Source the environment configuration
+#!/usr/bin/env bash
+
 source ../.erc
 
 # Run the merge command

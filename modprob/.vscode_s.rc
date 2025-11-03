@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
-# ~/.vscode_s.rc
 # Shell configuration file for VS Code integrated terminal
+
+source ~/.bashrc
+source ~/.profile
 
 # Dynamically detect the current shell and initialize Starship
 current_shell=$(basename "$SHELL")
