@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+# ~/.vscode_s.rc
+# Shell configuration file for VS Code integrated terminal
+
+# Dynamically detect the current shell and initialize Starship
+current_shell=$(basename "$SHELL")
+
+case "$current_shell" in
+    bash)
+        # Initialize Starship for Bash shell
+        eval "$(starship init bash)"
+        ;;
+    zsh)
+        # Initialize Starship for Zsh shell  
+        eval "$(starship init zsh)"
+        ;;
+    fish)
+        # Initialize Starship for Fish shell
+        starship init fish | source
+        ;;
+    *)
+        # Fallback for unsupported shells
+        echo "Warning: Starship not configured for $current_shell shell"
+        ;;
+esac
+
+# Add other VS Code-specific configurations below
