@@ -1,0 +1,97 @@
+#!/usr/bin/env bash
+
+# Main deployment script
+set -euo pipefail
+
+readonly SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+readonly TEMP_STARSHIP_CONFIG="/tmp/.tmp-starship.toml"
+
+log_info() {
+    echo "ℹ️  $1"
+}
+
+log_warning() {
+    echo "⚠️  $1"
+}
+
+log_success() {
+    echo "✅ $1"
+}
+
+# Check if we're in a container and sudo is restricted
+check_environment() {
+    if [[ -f /.dockerenv ]] || grep -q docker /proc/1/cgroup 2>/dev/null; then
+        log_info "Container environment detected"
+        if sudo -n true 2>/dev/null; then
+            log_info "sudo is available"
+            return 0
+        else
+            log_warning "sudo is restricted in container - adapting..."
+            return 1
+        fi
+    fi
+    return 0
+}
+
+run_script() {
+    log_info "Executing: $1"
+    
+    if [[ -x "$1" ]]; then
+        bash "$1"
+    else
+        log_warning "Script $1 is not executable, attempting to continue..."
+        bash "$1"
+    fi
+}
+
+# Check environment and proceed accordingly
+if ! check_environment; then
+    log_warning "Running in restricted environment - some operations may fail"
+fi
+
+# Execute dependency and installation scripts
+run_script "./dep.sh" || {
+    log_warning "Dependency script had issues, but continuing..."
+}
+
+run_script "./install.sh" || {
+    log_warning "Install script had issues, but continuing..."
+}
+
+# Configure starship prompt
+log_info "Configuring starship prompt..."
+if command -v starship &>/dev/null; then
+    starship preset no-nerd-font -o "$TEMP_STARSHIP_CONFIG"
+    mkdir -p ~/.config
+    echo "add_newline = false" > ~/.config/starship.toml
+    cat "$TEMP_STARSHIP_CONFIG" >> ~/.config/starship.toml
+    rm -f "$TEMP_STARSHIP_CONFIG"
+else
+    log_warning "starship not found, skipping prompt configuration"
+fi
+
+# Process module configurations
+log_info "Processing module configurations..."
+if [[ -d "modprob" ]]; then
+    cd modprob
+    if [[ -f "jq-merge.sh" ]]; then
+        run_script "jq-merge.sh"
+    else
+        log_warning "jq-merge.sh not found in modprob directory"
+    fi
+    cd ..
+else
+    log_warning "modprob directory not found"
+fi
+
+# Deploy VS Code configuration
+log_info "Deploying VS Code configuration..."
+if [[ -f "modprob/.vscode_s.rc" ]]; then
+    cp "modprob/.vscode_s.rc" ~/
+elif [[ -f ".vscode_s.rc" ]]; then
+    cp ".vscode_s.rc" ~/
+else
+    log_warning "VS Code configuration file not found"
+fi
+
+log_success "Setup completed (with possible warnings)"
