@@ -1,0 +1,3 @@
+echo '.erc loaded!'
+
+VSCODE__USR_SETTINGS_DEFAULT_PATH__POSIX=$HOME/.config/Code/User/settings.json
